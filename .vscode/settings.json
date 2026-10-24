@@ -1,0 +1,15 @@
+{
+  "cmake.cmakePath": "${workspaceFolder}/.tools/cmake-4.4.4-windows-x86_64/bin/cmake.exe",
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": false,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "files.exclude": {
+    "**/.tools": true,
+    "**/WarbladeSR-inspect": true
+  },
+  "search.exclude": {
+    "**/.tools": true,
+    "**/build": true,
+    "**/WarbladeSR-inspect": true
+  }
+}

@@ -1,0 +1,21 @@
+# Generated builds and project-local tools
+/build/
+/.tools/
+/vcpkg_installed/
+/CMakeUserPresets.json
+
+# Reference checkout and original game files are not part of this project
+/WarbladeSR-inspect/
+/game/
+/data/
+/assets/original/
+
+# Local editor state
+/.vs/
+/.idea/
+*.user
+*.suo
+
+# Windows metadata
+Thumbs.db
+Desktop.ini
