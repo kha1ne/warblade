@@ -13,6 +13,17 @@
       "preLaunchTask": "Build: Debug"
     },
     {
+      "name": "Warblade (ASan)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/asan/warblade.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "preLaunchTask": "Build: ASan"
+    },
+    {
       "name": "Warblade (Release)",
       "type": "cppvsdbg",
       "request": "launch",

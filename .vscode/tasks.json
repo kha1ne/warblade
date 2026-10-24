@@ -20,6 +20,15 @@
       "group": "build"
     },
     {
+      "label": "Build: ASan",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "build.bat", "asan"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
       "label": "Run: Debug",
       "type": "process",
       "command": "${workspaceFolder}/build/debug/warblade.exe",
@@ -33,6 +42,14 @@
       "command": "${workspaceFolder}/build/release/warblade.exe",
       "options": { "cwd": "${workspaceFolder}" },
       "dependsOn": "Build: Release",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run: ASan",
+      "type": "process",
+      "command": "${workspaceFolder}/build/asan/warblade.exe",
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": "Build: ASan",
       "problemMatcher": []
     },
     {

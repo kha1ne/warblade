@@ -6,7 +6,8 @@ https://aka.ms/vs/18/insiders/vs_BuildTools.exe
 From Command Prompt beside the downloaded installer:
 vs_BuildTools.exe --config "C:\Development\warblade\cpp-gamedev-buildtools.vsconfig"
 
-The configuration requests MSVC x64/x86, one Windows SDK, CMake/Ninja, and vcpkg.
+The configuration requests MSVC x64/x86, AddressSanitizer, one Windows SDK,
+CMake/Ninja, and vcpkg.
 Required dependencies are added automatically. Additional workloads are unnecessary.
 
 After installation, follow README.md: setup.ps1 installs the pinned project-local

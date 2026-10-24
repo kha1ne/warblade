@@ -2,7 +2,7 @@
 setlocal
 set "CONFIG=%~1"
 if not defined CONFIG set "CONFIG=debug"
-if not "%CONFIG%"=="debug" if not "%CONFIG%"=="release" goto usage
+if not "%CONFIG%"=="debug" if not "%CONFIG%"=="release" if not "%CONFIG%"=="asan" goto usage
 if not "%~2"=="" if not "%~2"=="run" goto usage
 if not "%~3"=="" goto usage
 
@@ -17,9 +17,11 @@ if not exist "%VSWHERE%" (
     exit /b 1
 )
 set "VS="
-for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -prerelease -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VS=%%i"
+set "COMPONENTS=Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+if "%CONFIG%"=="asan" set "COMPONENTS=%COMPONENTS% Microsoft.VisualStudio.Component.VC.ASAN"
+for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -prerelease -requires %COMPONENTS% -property installationPath`) do set "VS=%%i"
 if not defined VS (
-    echo Install the MSVC x64/x86 component using cpp-gamedev-buildtools.vsconfig.
+    echo Required MSVC components were not found. Import cpp-gamedev-buildtools.vsconfig.
     exit /b 1
 )
 call "%VS%\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul
@@ -42,5 +44,5 @@ echo powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup.ps1"
 exit /b 1
 
 :usage
-echo Usage: build.bat [debug^|release] [run]
+echo Usage: build.bat [debug^|asan^|release] [run]
 exit /b 2
