@@ -72,10 +72,31 @@ The Windows presets use Ninja, separate Debug/Release build directories, and the
 
 ## VS Code
 
-Install the recommended **C/C++** and **CMake Tools** extensions, then run setup.
-Use **CMake: Select Configure Preset** to choose `debug` or `release`, followed by
-**CMake: Build** or **CMake: Debug**. The presets declare the external x64 architecture
-so CMake Tools can initialize MSVC. The terminal build command above is also available.
+Open this folder in VS Code. `.vscode/extensions.json` recommends:
+
+- **C/C++** (`ms-vscode.cpptools`): IntelliSense, formatting, and the MSVC debugger.
+- **CMake Tools** (`ms-vscode.cmake-tools`): CMake presets, targets, and IntelliSense configuration.
+
+Open Extensions (`Ctrl+Shift+X`) and search `@recommended` to install them.
+On a fresh checkout, run **Tasks: Run Task > Setup: Build tools** once; the task
+uses a process-only PowerShell execution-policy bypass.
+
+| Action | Command / shortcut |
+| --- | --- |
+| Build Debug | `Ctrl+Shift+B` (default build task) |
+| Build Release | **Tasks: Run Task > Build: Release** |
+| Build and run | **Tasks: Run Task > Run: Debug** or **Run: Release** |
+| Debug | Select **Warblade (Debug)** in Run and Debug, set a breakpoint, press `F5` |
+| Run without debugging | Select a launch configuration and press `Ctrl+F5` |
+
+Launch configurations build their matching target first and use the integrated
+terminal. Release is optimized and has no debug symbols; use Debug for breakpoints.
+Build tasks call `build.bat`, which initializes MSVC without a developer terminal.
+
+For CMake Tools and IntelliSense, use **CMake: Select Configure Preset** to select
+`debug` or `release`, then **CMake: Configure**. The presets declare the external
+x64 architecture so CMake Tools can initialize MSVC. Include paths and compiler
+options come from CMake; no separate `c_cpp_properties.json` is needed.
 
 ## Layout
 
@@ -87,7 +108,7 @@ vcpkg.json                       Pinned dependency baseline; currently no packag
 setup.ps1                        One-time local tool download
 build.bat                        Configure, build, and optionally run
 cpp-gamedev-buildtools.vsconfig   Minimal Microsoft Build Tools component selection
-.vscode/                         Editor configuration and extension recommendations
+.vscode/                         Extension recommendations, build/run tasks, and debugger settings
 LICENSE                          MIT license for this starter
 ```
 

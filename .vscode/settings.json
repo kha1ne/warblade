@@ -11,5 +11,10 @@
     "**/.tools": true,
     "**/build": true,
     "**/WarbladeSR-inspect": true
+  },
+  "files.watcherExclude": {
+    "**/.tools/**": true,
+    "**/build/**": true,
+    "**/WarbladeSR-inspect/**": true
   }
 }
