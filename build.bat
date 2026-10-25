@@ -43,8 +43,12 @@ exit /b 0
 exit /b %ERRORLEVEL%
 
 :run
-"build\%CONFIG%\warblade.exe"
-exit /b %ERRORLEVEL%
+pushd "build\%CONFIG%"
+if errorlevel 1 exit /b 1
+"warblade.exe"
+set "RUN_RESULT=%ERRORLEVEL%"
+popd
+exit /b %RUN_RESULT%
 
 :setup
 echo Run this once, then retry:

@@ -3,8 +3,6 @@ install(TARGETS warblade RUNTIME DESTINATION . CONFIGURATIONS Release)
 install(FILES $<TARGET_RUNTIME_DLLS:warblade> DESTINATION . CONFIGURATIONS Release)
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION licenses
         RENAME warblade.txt CONFIGURATIONS Release)
-install(FILES "${PROJECT_SOURCE_DIR}/packaging/warblade-media.txt" DESTINATION licenses
-        CONFIGURATIONS Release)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/assets/" DESTINATION assets
         CONFIGURATIONS Release)
 foreach(dependency IN ITEMS sdl3 sdl3-image sdl3-mixer libxmp zlib libpng libjpeg-turbo libspng)

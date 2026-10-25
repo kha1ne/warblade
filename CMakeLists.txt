@@ -27,11 +27,22 @@ endif()
 # This enables implemented draft features, not complete C++26 conformance.
 target_compile_features(warblade PRIVATE cxx_std_23)
 set_target_properties(warblade PROPERTIES
+    WIN32_EXECUTABLE "$<CONFIG:Release>"
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS OFF
     COMPILE_WARNING_AS_ERROR "${WARBLADE_WARNINGS_AS_ERRORS}"
 )
+
+add_custom_target(warblade_assets
+    COMMAND "${CMAKE_COMMAND}"
+            "-DSOURCE=${PROJECT_SOURCE_DIR}/assets"
+            "-DDESTINATION=$<TARGET_FILE_DIR:warblade>/assets"
+            -P "${PROJECT_SOURCE_DIR}/cmake/StageAssets.cmake"
+    COMMENT "Preparing assets beside warblade.exe"
+    VERBATIM
+)
+add_dependencies(warblade warblade_assets)
 
 if(MSVC)
     set_target_properties(warblade PROPERTIES
@@ -69,6 +80,8 @@ if(WARBLADE_ENABLE_ASAN)
     endif()
     # /RTC and incremental linking are incompatible with AddressSanitizer.
     set_property(TARGET warblade PROPERTY MSVC_RUNTIME_CHECKS "")
+    target_sources(warblade PRIVATE src/asan_report.cpp)
+    target_compile_definitions(warblade PRIVATE WARBLADE_ENABLE_ASAN=1)
     target_compile_options(warblade PRIVATE /fsanitize=address)
     target_link_options(warblade PRIVATE /INCREMENTAL:NO)
     add_custom_command(TARGET warblade POST_BUILD

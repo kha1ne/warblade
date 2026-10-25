@@ -32,7 +32,7 @@
       "label": "Run: Debug",
       "type": "process",
       "command": "${workspaceFolder}/build/debug/warblade.exe",
-      "options": { "cwd": "${workspaceFolder}" },
+      "options": { "cwd": "${workspaceFolder}/build/debug" },
       "dependsOn": "Build: Debug",
       "problemMatcher": []
     },
@@ -40,7 +40,7 @@
       "label": "Run: Release",
       "type": "process",
       "command": "${workspaceFolder}/build/release/warblade.exe",
-      "options": { "cwd": "${workspaceFolder}" },
+      "options": { "cwd": "${workspaceFolder}/build/release" },
       "dependsOn": "Build: Release",
       "problemMatcher": []
     },
@@ -48,7 +48,7 @@
       "label": "Run: ASan",
       "type": "process",
       "command": "${workspaceFolder}/build/asan/warblade.exe",
-      "options": { "cwd": "${workspaceFolder}" },
+      "options": { "cwd": "${workspaceFolder}/build/asan" },
       "dependsOn": "Build: ASan",
       "problemMatcher": []
     },

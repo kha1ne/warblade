@@ -1,16 +1,17 @@
 # Warblade
 
-A minimal C++ starter for a future Warblade remake. It currently prints:
+A minimal C++ starter for a future Warblade remake. Debug and ASan currently print:
 
 ```text
 Hello, Warblade!
 ```
 
-There is one executable and one source file. The original Warblade icon and
+There is one executable with a small ASan reporting helper. The original Warblade icon and
 unpacked graphics, music, sound effects, voice packs, and game data are included
 in the repository. SDL3, SDL3_image, SDL3_mixer, and zlib are configured and linked
-through vcpkg. The executable still only prints the message above; no engine or
-gameplay is implemented yet. Building and installing require no original Warblade
+through vcpkg. Release is a Windows GUI executable and exits without opening a
+console; no game window, engine, or gameplay is implemented yet.
+Building and installing require no original Warblade
 installation, archive extraction, or importer.
 
 ## Requirements
@@ -23,6 +24,20 @@ installation, archive extraction, or importer.
 - Internet access for the first tool setup and configure (vcpkg may fetch helper tools).
 - `setup.ps1` also prepares Inno Setup 7.1.0 under `.tools` for installer creation.
   It uses the official compiler's portable mode without registering it globally.
+
+Use the standalone Build Tools product. The official Insiders bootstrapper is
+[vs_BuildTools.exe](https://aka.ms/vs/18/insiders/vs_BuildTools.exe). From Command
+Prompt in this project directory, use the bootstrapper's full path if needed:
+
+```bat
+vs_BuildTools.exe --config "%CD%\cpp-gamedev-buildtools.vsconfig"
+```
+
+The configuration selects MSVC x64/x86, AddressSanitizer, one Windows SDK, CMake/
+Ninja, and vcpkg. Required dependencies are added automatically; additional
+workloads and the full Visual Studio IDE are unnecessary. The first build installs
+the libraries declared in `vcpkg.json`. Inno Setup is prepared by `setup.ps1`, not
+by a Visual Studio component.
 
 ## Build and run
 
@@ -64,6 +79,16 @@ It works from an ordinary terminal; no permanent PATH changes are required.
 The first configure downloads and builds the libraries in `vcpkg.json`, including
 Debug and Release variants. Later builds reuse them and vcpkg's binary cache.
 
+Each build prepares an `assets/` directory junction beside its executable, pointing
+to the repository's assets. Asset edits appear immediately without duplicate
+copies. The build wrapper and VS Code run/debug actions use the executable's
+directory as their working directory. Installed games receive real asset files.
+
+Release uses CMake's Windows GUI subsystem and SDL3's `SDL_main.h` entry point,
+so launching it from Explorer does not open a terminal. Debug and ASan retain
+their consoles. The current Release starter exits immediately because no game
+window has been implemented yet.
+
 ## Tool versions
 
 Latest stable releases checked on **2026-10-25**, pinned for reproducible setup:
@@ -104,6 +129,7 @@ support. Draft features can change with compiler updates. See Microsoft's
 | Symbols | `/Zi` + `/DEBUG:FULL` PDB | `/Zi` + `/DEBUG:FULL` PDB | `/Zi` + `/DEBUG:FULL` PDB |
 | Linking | Incremental; retain separate functions/data for debugging | Non-incremental; retain separate functions/data | Non-incremental; `/OPT:REF /OPT:ICF` |
 | Control Flow Guard | Off | Off | `/guard:cf` at compile and link time |
+| Windows subsystem | Console | Console | GUI, without an accompanying console |
 
 All modes use `/W4`, warnings as errors, `/permissive-`, `/Zc:preprocessor`,
 `/Zc:__cplusplus`, UTF-8 source handling, `/GS`, `/sdl`, and `/fp:precise`.
@@ -151,6 +177,13 @@ incremental linking without changing the ordinary Debug preset. See Microsoft's
 [ASan build reference](https://learn.microsoft.com/en-us/cpp/sanitizers/asan-building)
 and [runtime documentation](https://learn.microsoft.com/en-us/cpp/sanitizers/asan-runtime).
 
+On startup, the ASan build clears `asan.txt` beside its executable. ASan error
+reports raised after application startup are copied into that file while retaining
+the normal terminal/debugger output. This works for direct launches, `build.bat
+asan run`, and VS Code debugging; the path does not depend on the working
+directory. A clean run leaves an empty file. Runtime startup/load failures before
+the application installs its report callback remain in the terminal/debugger.
+
 ## Windows installer
 
 Create an Inno Setup `.exe` installer from an ordinary PowerShell terminal:
@@ -182,7 +215,6 @@ The package includes only files selected by CMake `install()` rules:
 
 - `warblade.exe` and runtime DLLs declared through linked CMake shared-library targets.
 - `licenses/warblade.txt` containing this project's license.
-- `licenses/warblade-media.txt` documenting the original media's origin and license exclusion.
 - `licenses/third-party/<package>/copyright.txt` for the bundled libraries and codecs.
 - All files under `assets/`, installed beside `warblade.exe` as `assets/` with the
   same subdirectories and filenames.
@@ -203,9 +235,8 @@ filename, and Windows executable version metadata. Edit packaging settings in
 in Debug, ASan, and Release executables and the
 installer. Start Menu and desktop shortcuts use the installed executable's icon;
 the uninstall entry also points to it. No separate runtime `.ico` file is needed.
-The icon contains 16x16, 32x32, and 48x48 images. Its provenance and exclusion from
-the MIT license are recorded along with the other media in
-`packaging/warblade-media.txt`, which is also shipped in the installer.
+The icon contains 16x16, 32x32, and 48x48 images. Original media ownership and
+exclusion from the source-code MIT license are documented below.
 
 ### Optional signing
 
@@ -256,8 +287,9 @@ uses a process-only PowerShell execution-policy bypass.
 | Debug with ASan | Select **Warblade (ASan)** in Run and Debug and press `F5` |
 | Run without debugging | Select a launch configuration and press `Ctrl+F5` |
 
-Launch configurations build their matching target first and use the integrated
-terminal. Release has symbols but is optimized; use Debug for reliable stepping and breakpoints.
+Launch configurations build their matching target first and run from its output
+directory. Debug and ASan retain console output; Release has no accompanying
+console. Release has symbols but is optimized; use Debug for reliable stepping and breakpoints.
 Build tasks call `build.bat`, which initializes MSVC without a developer terminal.
 
 For CMake Tools and IntelliSense, use **CMake: Select Configure Preset** to select
@@ -269,16 +301,16 @@ options come from CMake; no separate `c_cpp_properties.json` is needed.
 
 ```text
 src/main.cpp                     Hello World executable
+src/asan_report.cpp              ASan-only report file callback
 CMakeLists.txt                   Target, C++ standard, and compiler warnings
 CMakePresets.json                Ninja + vcpkg Debug/ASan/Release configuration
 vcpkg.json                       Pinned SDL/image/audio/compression dependencies
 vcpkg-ports/                     SDL subsystem trimming and bundled MP3 decoder overlays
 setup.ps1                        One-time local tool download
 build.bat                        Configure, build, run, or package Release
-cmake/                           Installer payload, CPack configuration, optional signing
+cmake/                           Asset staging, installer configuration, optional signing
 packaging/warblade.rc.in          Windows executable icon and version metadata
 packaging/warblade.ico            Original game icon for executable, shortcuts, and installer
-packaging/warblade-media.txt      Original media provenance and license exclusion
 assets/audio/                    Music, sound effects, voices, and voice metadata
 assets/graphics/                 TGA, JPG, and PNG images
 assets/data/                     Hit masks, levels, and attack patterns
@@ -329,8 +361,8 @@ image and audio feature coverage:
 SDL_mixer uses its bundled **dr_mp3** for MP3 and **stb_vorbis** for OGG Vorbis;
 they are built into SDL_mixer rather than installed as separate packages.
 `vcpkg-ports/sdl3-mixer/` enables dr_mp3, which the registry port disables by
-default. The overlay comes from the official pinned vcpkg port and retains its
-license; see `vcpkg-ports/README.md`. No WarbladeSR checkout is needed to build it.
+default. It keeps bundled stb_vorbis enabled, uses libxmp for tracker music, and
+preserves the bundled codec notices in the installed copyright file.
 
 `vcpkg-ports/sdl3/` builds SDL 3.4.18 with WarbladeSR's ten subsystem exclusions:
 GPU API, GPU renderer, camera, haptics, power information, sensors, native dialogs,
@@ -338,6 +370,13 @@ tray support, OpenGL ES, and HIDAPI are all disabled. Direct3D, desktop OpenGL,
 Vulkan, and generic joystick/XInput support remain available. The disabled GPU
 API is separate from the hardware-accelerated renderer backends. This profile
 does not include HIDAPI-specific controller drivers or the haptic API.
+
+Both overlays adapt the official ports from the pinned vcpkg 2026.10.16 registry
+and retain Microsoft's MIT notice in `vcpkg-ports/LICENSE.txt`. The project manifest
+selects them through a relative overlay path. SDL3_image uses the unmodified
+registry port. No WarbladeSR checkout is needed to build the project. When updating
+the baseline, review both recipes against the new official ports, retaining source
+checksums, applicable patches, and copyright notices.
 
 CMake finds and links `SDL3::SDL3`, `SDL3_image::SDL3_image`,
 `SDL3_mixer::SDL3_mixer`, and `ZLIB::ZLIB` to `warblade`. Image/audio codec
@@ -369,66 +408,47 @@ references for structure and tooling. This starter is written independently:
 
 `WarbladeSR-inspect/` is an ignored, separate reference checkout, used for research.
 Its inspected SDL revision contains no standalone media assets. The original media
-included in this repository came from Warblade 1.34, not from that checkout.
+included in this repository came from Warblade 1.34 by Edgar M. Vigdal / EMV
+Software. Graphics and game data were unpacked from its archive; music, effects,
+and voice packs were copied without conversion. The original Lila voice-pack
+readme credits its samples to Simon Quincey.
 
 The MIT license applies to this project's independently written source code;
 adapted vcpkg port files retain the Microsoft notice in `vcpkg-ports/LICENSE.txt`.
 It does not cover `assets/` or `packaging/warblade.ico`. Those original files retain
 their owners' rights and restrictions; this project has not established permission
-to redistribute them. See `packaging/warblade-media.txt`. Dependencies retain their
-own licenses.
+to redistribute them. Dependencies retain their own licenses; their copyright
+notices are included in the installer.
 
 ## Verification
 
-Debug, ASan, and Release were configured, built, and run on Windows with MSVC
-19.52.37025.0, CMake 4.4.4, Ninja 1.13.2, and the pinned vcpkg release. All three
-printed `Hello, Warblade!` and exited successfully. The ASan executable also ran
-directly outside the MSVC environment. An ignored, deliberately faulty probe
-reported `heap-use-after-free` and exited with an error, verifying the sanitizer
-runtime detects a real memory error. Setup was also rerun to
-verify reuse of the installed tools. VS Code's GUI build/debug actions have
-not been exercised; the ordinary-terminal build path above has been verified.
+Debug, ASan, and Release were built and run with MSVC 19.52.37025.0, CMake 4.4.4,
+Ninja 1.13.2, and the pinned vcpkg release. PE headers confirm that Debug/ASan use
+the console subsystem and Release uses the Windows GUI subsystem. SDL3's entry
+point works in all three modes.
 
-The unsigned Inno Setup installer was built and installed into an isolated test
-directory. Its installed executable, license, Start Menu shortcut, and uninstall
-registration were checked. A test 0.1.1 installer upgraded the 0.1.0 installation
-without being given the previous directory. Uninstallation removed the registered
-files/shortcuts and preserved a user-created file. The test registration was cleaned
-up. Debug/ASan builds still ran successfully after packaging was added.
+All three development asset junctions were checked against the repository's 946
+files. Additions, edits, and removals appear immediately. Staging also worked with
+spaces in paths and rejected an unrelated existing directory without altering it.
 
-All four original icon images were verified byte-for-byte in the Debug, ASan,
-Release, and installer executable resources. A fresh isolated installation verified
-the installed executable's icon, Start Menu shortcut target, uninstall display
-icon, and installed media provenance notice. The test installation and shortcuts
-were removed afterward. The generated installer script also points the optional
-desktop shortcut to the same executable.
+An ignored probe compiled with the production ASan report helper detected a real
+heap-use-after-free, exited unsuccessfully, and saved the diagnostic to `asan.txt`
+beside the probe executable. Clean direct launches and stale-log clearing passed.
+No faulty probe code is part of the game or installer.
 
-The installer was rebuilt with all 946 assets under `assets/`. Every staged and
-installed asset matched the repository file by SHA-256. The installed executable
-ran from its own directory, the media notice and shortcut were checked, and
-uninstallation removed the test assets, registration, and shortcuts. No asset
-manifest or importer is retained; asset paths and provenance use relative paths.
+The rebuilt unsigned installer was installed into an isolated directory. Its GUI
+executable ran successfully; all 946 real asset files matched by SHA-256, eight
+dependency notices and the shortcut were checked, and the removed media notice
+and ASan log were absent. Uninstallation removed the test assets, registration,
+and shortcuts. Earlier checks covered icon resources and version upgrades.
 
-After adding the libraries, Debug, ASan, and Release all built and ran successfully.
-An ignored dependency smoke program loaded all 407 images and all 276 audio files,
-generated an audio buffer for each file using an in-memory mixer, and passed a
-zlib compression/decompression round-trip. This checks TGA/PNG/JPEG and
-MP3/OGG/tracker support without opening a window or playing sound on a device.
-The rebuilt installer was installed and uninstalled again; all assets and all
-eight third-party copyright files matched their sources.
+Dependency smoke checks loaded all 407 images and 276 audio files, generated an
+audio buffer for each, and passed a zlib compression/decompression round-trip.
+The ten trimmed SDL options were verified OFF in both SDL configurations;
+Direct3D, desktop OpenGL, Vulkan, and generic joystick/XInput remained enabled.
 
-During the first dependency build, MSVC 19.52 Insiders intermittently reported
-internal compiler errors in unrelated dependency files. Retrying succeeded;
-the final audio build used `$env:VCPKG_MAX_CONCURRENCY = '8'` before `build.bat`.
-This temporary workaround limits dependency build concurrency and does not alter
-the game's Debug or Release optimization flags.
-
-With the trimmed SDL overlay, all ten selected options were verified OFF in both
-SDL Debug and Release configurations. Direct3D, desktop OpenGL, Vulkan, and generic
-joystick/XInput remained enabled. All three application modes and the full image,
-audio-buffer, and zlib smoke checks passed again; the installer was rebuilt using
-the trimmed dependencies.
-
-Debug packaging was rejected. A requested signing run with a nonexistent certificate
-failed during staging before installer compilation. Successful trusted signing is
-not tested because no code-signing identity has been configured.
+During the first dependency build, MSVC Insiders intermittently reported internal
+compiler errors. Retrying with `$env:VCPKG_MAX_CONCURRENCY = '8'` succeeded without
+changing optimization flags. VS Code GUI build/debug actions and successful
+trusted signing have not been exercised. Debug packaging and a signing attempt
+with a nonexistent certificate were correctly rejected in earlier checks.
