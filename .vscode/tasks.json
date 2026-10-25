@@ -53,6 +53,15 @@
       "problemMatcher": []
     },
     {
+      "label": "Package: Windows installer",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "build.bat", "release", "package"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
       "label": "Setup: Build tools",
       "type": "process",
       "command": "powershell.exe",

@@ -12,4 +12,6 @@ Required dependencies are added automatically. Additional workloads are unnecess
 
 After installation, follow README.md: setup.ps1 installs the pinned project-local
 tools, and build.bat initializes the MSVC environment and builds this starter.
+setup.ps1 also prepares Inno Setup under .tools; it is not a Microsoft Installer
+component. Use build.bat release package to create the Windows installer in dist.
 The full Visual Studio IDE and original Warblade game files are not required.

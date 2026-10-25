@@ -1,0 +1,10 @@
+include("${CMAKE_CURRENT_LIST_DIR}/Signing.cmake")
+warblade_sign_command(sign_command)
+if(NOT sign_command)
+    message(FATAL_ERROR "Signing identity disappeared before package verification.")
+endif()
+list(GET sign_command 0 sign_tool)
+foreach(package IN LISTS CPACK_PACKAGE_FILES)
+    execute_process(COMMAND "${sign_tool}" verify /pa /all /tw "${package}"
+                    COMMAND_ERROR_IS_FATAL ANY)
+endforeach()

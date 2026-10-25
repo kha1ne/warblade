@@ -54,5 +54,26 @@
     { "name": "debug", "configurePreset": "debug" },
     { "name": "asan", "configurePreset": "asan" },
     { "name": "release", "configurePreset": "release" }
+  ],
+  "packagePresets": [
+    {
+      "name": "release",
+      "displayName": "Warblade Windows installer",
+      "configurePreset": "release",
+      "generators": ["INNOSETUP"],
+      "configurations": ["Release"],
+      "packageDirectory": "${sourceDir}/dist"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "installer",
+      "displayName": "Build Release and create the Windows installer",
+      "steps": [
+        { "type": "configure", "name": "release" },
+        { "type": "build", "name": "release" },
+        { "type": "package", "name": "release" }
+      ]
+    }
   ]
 }

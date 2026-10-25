@@ -1,5 +1,6 @@
 # Project-local stable tools, verified on 2026-10-25. No administrator rights needed.
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 Set-StrictMode -Version Latest
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -47,7 +48,33 @@ if (-not (Test-Path -LiteralPath (Join-Path $vcpkgDir 'vcpkg.exe'))) {
     if ($LASTEXITCODE -ne 0) { throw 'Could not bootstrap vcpkg.' }
 }
 
+$innoDir = Join-Path $toolsDir 'innosetup-7.1.0'
+$innoExe = Join-Path $innoDir 'ISCC.exe'
+if (-not (Test-Path -LiteralPath $innoExe)) {
+    $innoInstaller = Join-Path $toolsDir 'innosetup-7.1.0-x64.exe'
+    Write-Host 'Downloading Inno Setup 7.1.0'
+    Invoke-WebRequest -UseBasicParsing `
+        -Uri 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe' `
+        -OutFile $innoInstaller
+    if ((Get-FileHash -LiteralPath $innoInstaller -Algorithm SHA256).Hash -ne
+        '0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f') {
+        throw 'Inno Setup checksum mismatch.'
+    }
+    # Official portable compiler mode: no registration, shortcuts, or file associations.
+    $innoArgs = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-',
+                  '/CURRENTUSER', '/PORTABLE=1', '/NOICONS',
+                  ('/DIR="' + $innoDir + '"'),
+                  ('/LOG="' + (Join-Path $toolsDir 'innosetup-install.log') + '"'))
+    $innoProcess = Start-Process -FilePath $innoInstaller -ArgumentList $innoArgs `
+        -WindowStyle Hidden -Wait -PassThru
+    if ($innoProcess.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $innoExe)) {
+        throw 'Inno Setup preparation failed. See .tools\innosetup-install.log.'
+    }
+    Remove-Item -LiteralPath $innoInstaller
+}
+
 & $cmakeExe --version
 & $ninjaExe --version
 & (Join-Path $vcpkgDir 'vcpkg.exe') version
 Write-Host 'Ready. Run .\build.bat debug run'
+Write-Host 'Inno Setup 7.1.0 ready. Create an installer with .\build.bat release package'

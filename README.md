@@ -18,6 +18,8 @@ dependency list, ready for libraries when needed.
   It also selects **MSVC AddressSanitizer**, required for the `asan` mode.
   The full Visual Studio IDE is unnecessary. Insiders installations are supported.
 - Internet access for the first tool setup and configure (vcpkg may fetch helper tools).
+- `setup.ps1` also prepares Inno Setup 7.1.0 under `.tools` for installer creation.
+  It uses the official compiler's portable mode without registering it globally.
 
 ## Build and run
 
@@ -66,16 +68,18 @@ Latest stable releases checked on **2026-10-25**, pinned for reproducible setup:
 | CMake | [4.4.4](https://github.com/Kitware/CMake/releases/tag/v4.4.4) |
 | Ninja | [1.13.2](https://github.com/ninja-build/ninja/releases/tag/v1.13.2) |
 | vcpkg registry/scripts | [2026.10.16](https://github.com/microsoft/vcpkg/releases/tag/2026.10.16) |
+| Inno Setup x64 | [7.1.0](https://github.com/jrsoftware/issrc/releases/tag/is-7_1_0) |
 | Compiler | Installed MSVC x64 toolset |
 | Language | C++23 minimum; MSVC latest draft mode with the pinned CMake |
 
-`setup.ps1` downloads official portable CMake/Ninja releases and verifies SHA-256
-hashes, then checks out the pinned vcpkg release and runs its official bootstrap.
+`setup.ps1` downloads official CMake/Ninja releases and the Inno Setup compiler,
+verifies their SHA-256 hashes, then checks out the pinned vcpkg release and runs
+its official bootstrap.
 It stores everything under ignored `.tools/`; no global tool installation is changed.
 Rerunning setup reuses existing tools. vcpkg's bootstrap selects the executable
 version recorded by its release; its version date can differ from the registry tag.
 
-The Windows presets use Ninja, separate Debug/Release build directories, and the
+The Windows presets use Ninja, separate Debug/ASan/Release build directories, and the
 `x64-windows-static` vcpkg triplet with the matching static MSVC runtime.
 
 ## Compiler and build modes
@@ -142,6 +146,77 @@ incremental linking without changing the ordinary Debug preset. See Microsoft's
 [ASan build reference](https://learn.microsoft.com/en-us/cpp/sanitizers/asan-building)
 and [runtime documentation](https://learn.microsoft.com/en-us/cpp/sanitizers/asan-runtime).
 
+## Windows installer
+
+Create an Inno Setup `.exe` installer from an ordinary PowerShell terminal:
+
+```powershell
+.\build.bat release package
+```
+
+This configures and builds Release, then invokes `cpack --preset release`.
+For version 0.1.0 the output is:
+
+```text
+dist/Warblade-0.1.0-windows-x64-setup.exe
+```
+
+The output directory is ignored by Git. Debug/ASan packaging is rejected. There
+are no archive or MSI generators configured. The CMake workflow preset `installer`
+also runs configure, build, and package when invoked from an MSVC-initialized
+environment. The `build.bat` command initializes that environment automatically.
+
+The installer targets Windows 10+ x64-compatible systems and defaults to
+`%LOCALAPPDATA%\Programs\Warblade` without requesting administrator rights. It
+creates Start Menu and uninstall entries, offers an optional desktop shortcut,
+and remembers the selected installation directory on upgrades. The stable
+`AppId` in `cmake/Packaging.cmake` must remain unchanged between releases.
+There is no automatic updater; install a newer installer to update the game.
+
+The package includes only files selected by CMake `install()` rules:
+
+- `warblade.exe` and runtime DLLs declared through linked CMake shared-library targets.
+- `licenses/warblade.txt` containing this project's license.
+- Contents of `assets/game/`, if present, installed under `data/`.
+
+The starter currently has no assets or third-party runtime DLLs. When introducing
+libraries, add their required license notices and any plugins or dynamically
+loaded dependencies not represented in CMake's target graph. PDBs, source code,
+Debug/ASan runtimes, `.tools`, and reference assets are excluded. Keep matching
+Release PDBs separately for crash diagnosis. Store future saves/settings outside
+the installation directory; the installer does not create or remove that data.
+
+`project(... VERSION ...)` in `CMakeLists.txt` controls the installer version,
+filename, and Windows executable version metadata. Edit packaging settings in
+`cmake/Packaging.cmake`, not the generated `.iss` script under `dist/`.
+
+### Optional signing
+
+By default the installer is unsigned for development. No signing certificate or
+private key is included. To sign a release, make a real code-signing certificate
+and its private key available to Windows SDK SignTool in the current user's
+certificate store/provider, then set these environment variables before packaging:
+
+```powershell
+$env:WARBLADE_SIGN_CERT_SHA1 = '<40-character certificate thumbprint>'
+$env:WARBLADE_SIGN_TIMESTAMP_URL = '<provider RFC 3161 timestamp URL>'
+.\build.bat release package
+```
+
+Replace both placeholders with your provider's actual values. `/sha1` selects the
+certificate by thumbprint; the file and timestamp digests use **SHA-256**.
+The build wrapper supplies the Windows SDK SignTool path. CPack signs staged
+executables/DLLs that do not already have valid signatures, and Inno Setup signs
+the installer and uninstaller. Payload/package signatures are verified, and
+signing failures stop packaging. Original build outputs are not modified.
+
+This hook supports certificate-store/provider signing with SignTool. Other cloud
+signing integrations may require adapting `cmake/Signing.cmake`. Keep credentials
+out of Git; `.pfx`, `.p12`, and `.key` files are ignored. Signing identifies the
+publisher but does not guarantee immediate SmartScreen reputation. See
+[Microsoft's signing guidance](https://learn.microsoft.com/windows/apps/package-and-deploy/smartscreen-reputation).
+Actual trusted signing cannot be verified until a signing identity is configured.
+
 ## VS Code
 
 Open this folder in VS Code. `.vscode/extensions.json` recommends:
@@ -158,6 +233,7 @@ uses a process-only PowerShell execution-policy bypass.
 | Build Debug | `Ctrl+Shift+B` (default build task) |
 | Build Release | **Tasks: Run Task > Build: Release** |
 | Build ASan | **Tasks: Run Task > Build: ASan** |
+| Create installer | **Tasks: Run Task > Package: Windows installer** |
 | Build and run | **Tasks: Run Task > Run: Debug**, **Run: ASan**, or **Run: Release** |
 | Debug | Select **Warblade (Debug)** in Run and Debug, set a breakpoint, press `F5` |
 | Debug with ASan | Select **Warblade (ASan)** in Run and Debug and press `F5` |
@@ -180,7 +256,11 @@ CMakeLists.txt                   Target, C++ standard, and compiler warnings
 CMakePresets.json                Ninja + vcpkg Debug/ASan/Release configuration
 vcpkg.json                       Pinned dependency baseline; currently no packages
 setup.ps1                        One-time local tool download
-build.bat                        Configure, build, and optionally run
+build.bat                        Configure, build, run, or package Release
+cmake/                           Installer payload, CPack configuration, optional signing
+packaging/warblade.rc.in          Windows executable version metadata
+assets/game/                     Future distributable assets (installed as data/)
+dist/                            Generated installer and CPack staging (ignored)
 cpp-gamedev-buildtools.vsconfig   Minimal Microsoft Build Tools component selection
 .vscode/                         Extension recommendations, build/run tasks, and debugger settings
 LICENSE                          MIT license for this starter
@@ -222,3 +302,14 @@ reported `heap-use-after-free` and exited with an error, verifying the sanitizer
 runtime detects a real memory error. Setup was also rerun to
 verify reuse of the installed tools. VS Code's GUI build/debug actions have
 not been exercised; the ordinary-terminal build path above has been verified.
+
+The unsigned Inno Setup installer was built and installed into an isolated test
+directory. Its installed executable, license, Start Menu shortcut, and uninstall
+registration were checked. A test 0.1.1 installer upgraded the 0.1.0 installation
+without being given the previous directory. Uninstallation removed the registered
+files/shortcuts and preserved a user-created file. The test registration was cleaned
+up. Debug/ASan builds still ran successfully after packaging was added.
+
+Debug packaging was rejected. A requested signing run with a nonexistent certificate
+failed during staging before installer compilation. Successful trusted signing is
+not tested because no code-signing identity has been configured.

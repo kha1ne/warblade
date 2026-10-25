@@ -7,6 +7,10 @@ option(WARBLADE_ENABLE_IPO "Enable link-time optimization in Release" ON)
 option(WARBLADE_ENABLE_ASAN "Instrument project code with MSVC AddressSanitizer" OFF)
 
 add_executable(warblade src/main.cpp)
+if(WIN32)
+    configure_file(packaging/warblade.rc.in "${CMAKE_CURRENT_BINARY_DIR}/warblade.rc" @ONLY)
+    target_sources(warblade PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/warblade.rc")
+endif()
 # With the pinned CMake 4.4/MSVC toolchain, C++23 selects /std:c++latest.
 # This enables implemented draft features, not complete C++26 conformance.
 target_compile_features(warblade PRIVATE cxx_std_23)
@@ -71,4 +75,8 @@ if(WARBLADE_ENABLE_IPO)
                             "Configure with -DWARBLADE_ENABLE_IPO=OFF to disable it.")
     endif()
     set_property(TARGET warblade PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+endif()
+
+if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release" AND NOT WARBLADE_ENABLE_ASAN)
+    include(cmake/Packaging.cmake)
 endif()

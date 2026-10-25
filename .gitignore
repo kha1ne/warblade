@@ -1,8 +1,14 @@
 # Generated builds and project-local tools
 /build/
+/dist/
 /.tools/
 /vcpkg_installed/
 /CMakeUserPresets.json
+
+# Local signing credentials must not enter source control
+*.pfx
+*.p12
+*.key
 
 # Reference checkout and original game files are not part of this project
 /WarbladeSR-inspect/
