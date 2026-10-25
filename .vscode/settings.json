@@ -7,19 +7,16 @@
     "*.rc.in": "cpp"
   },
   "files.exclude": {
-    "**/.tools": true,
-    "**/WarbladeSR-inspect": true
+    "**/.tools": true
   },
   "search.exclude": {
     "**/.tools": true,
     "**/build": true,
-    "**/dist": true,
-    "**/WarbladeSR-inspect": true
+    "**/dist": true
   },
   "files.watcherExclude": {
     "**/.tools/**": true,
     "**/build/**": true,
-    "**/dist/**": true,
-    "**/WarbladeSR-inspect/**": true
+    "**/dist/**": true
   }
 }

@@ -10,8 +10,7 @@
 *.p12
 *.key
 
-# Local reference checkouts and legacy working folders
-/WarbladeSR-inspect/
+# Local working folders
 /game/
 /data/
 

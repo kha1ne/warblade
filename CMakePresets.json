@@ -14,7 +14,8 @@
         "VCPKG_DISABLE_METRICS": "1"
       },
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_C_COMPILER": "cl",
+        "WARBLADE_WARNINGS_AS_ERRORS": false,
         "WARBLADE_ENABLE_ASAN": false,
         "CMAKE_MAKE_PROGRAM": "${sourceDir}/.tools/ninja/ninja.exe",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true,

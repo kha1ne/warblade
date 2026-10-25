@@ -1,3 +1,16 @@
+License scope
+
+The MIT terms below apply to independently written build integration and the
+ASan reporting helper (src/core/asan_report.c and include/asan_report.h).
+They do not apply to WarbladeSR-derived game files under src/ and include/,
+assets/, or packaging/warblade.ico. Imported game code and original Warblade
+media retain their owners' rights and restrictions. The inspected WarbladeSR
+revision provides no standalone source license; no additional permission to
+redistribute that code or the original media is granted here. Adapted vcpkg
+ports retain the Microsoft notice in vcpkg-ports/LICENSE.txt. Dependencies
+retain their respective licenses, shipped under licenses/third-party/ in
+installed builds. See README.md for provenance.
+
 MIT License
 
 Copyright (c) 2026 kha1ne
