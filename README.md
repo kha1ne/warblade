@@ -8,10 +8,9 @@ Hello, Warblade!
 
 There is one executable and one source file. The original Warblade icon and
 unpacked graphics, music, sound effects, voice packs, and game data are included
-in the repository. No SDL, test framework, or engine code is included yet; the
-executable still only prints the message above and does not load the assets.
-vcpkg is connected in manifest mode with an empty dependency list, ready for
-libraries when needed. Building and installing require no original Warblade
+in the repository. SDL3, SDL3_image, SDL3_mixer, and zlib are configured and linked
+through vcpkg. The executable still only prints the message above; no engine or
+gameplay is implemented yet. Building and installing require no original Warblade
 installation, archive extraction, or importer.
 
 ## Requirements
@@ -62,6 +61,8 @@ Omit `run` to build only. You can also run an existing executable directly:
 The build wrapper finds Build Tools automatically (including Insiders), initializes
 the x64 MSVC environment, and runs the matching CMake configure/build presets.
 It works from an ordinary terminal; no permanent PATH changes are required.
+The first configure downloads and builds the libraries in `vcpkg.json`, including
+Debug and Release variants. Later builds reuse them and vcpkg's binary cache.
 
 ## Tool versions
 
@@ -182,12 +183,14 @@ The package includes only files selected by CMake `install()` rules:
 - `warblade.exe` and runtime DLLs declared through linked CMake shared-library targets.
 - `licenses/warblade.txt` containing this project's license.
 - `licenses/warblade-media.txt` documenting the original media's origin and license exclusion.
+- `licenses/third-party/<package>/copyright.txt` for the bundled libraries and codecs.
 - All files under `assets/`, installed beside `warblade.exe` as `assets/` with the
   same subdirectories and filenames.
 
-The starter includes 946 asset files and currently has no third-party runtime DLLs.
-When introducing libraries, add their required license notices and any plugins or dynamically
-loaded dependencies not represented in CMake's target graph. PDBs, source code,
+The starter includes 946 asset files. The libraries use static linking, so Release
+does not require SDL or codec DLLs. When introducing libraries, add their required
+license notices and any plugins or dynamically loaded dependencies not represented
+in CMake's target graph. PDBs, source code,
 Debug/ASan runtimes, `.tools`, and the WarbladeSR reference checkout are excluded. Keep matching
 Release PDBs separately for crash diagnosis. Store future saves/settings outside
 the installation directory; the installer does not create or remove that data.
@@ -268,7 +271,8 @@ options come from CMake; no separate `c_cpp_properties.json` is needed.
 src/main.cpp                     Hello World executable
 CMakeLists.txt                   Target, C++ standard, and compiler warnings
 CMakePresets.json                Ninja + vcpkg Debug/ASan/Release configuration
-vcpkg.json                       Pinned dependency baseline; currently no packages
+vcpkg.json                       Pinned SDL/image/audio/compression dependencies
+vcpkg-ports/                     SDL subsystem trimming and bundled MP3 decoder overlays
 setup.ps1                        One-time local tool download
 build.bat                        Configure, build, run, or package Release
 cmake/                           Installer payload, CPack configuration, optional signing
@@ -305,13 +309,50 @@ line-ending changes. The voice packs remain separate under `pack-1/` and `pack-2
 with their corresponding metadata. The current Hello World executable does not
 yet render graphics or play audio.
 
-## Adding dependencies
+## Libraries
+
+The dependency set follows WarbladeSR's SDL branch. The pinned registry supplies
+newer SDL core than that checkout (3.4.18 versus 3.4.16), while keeping the same
+image and audio feature coverage:
+
+| Library | Pinned version | Purpose |
+| --- | --- | --- |
+| SDL3 | 3.4.18 | Windows, rendering, input/controllers, audio, and Vulkan support |
+| SDL3_image | 3.4.8 | TGA, PNG, and JPEG images |
+| SDL3_mixer | 3.2.4 | Audio loading, mixing, and playback |
+| libxmp | 4.7.3 | Tracker music stored as `.mus` |
+| zlib | 1.3.2 | Compression/decompression |
+| libpng | 1.6.59 | PNG codec used through SDL3_image |
+| libjpeg-turbo | 3.2.0 | JPEG codec used through SDL3_image |
+| libspng | 0.7.4 | Transitive dependency of the pinned libjpeg-turbo port |
+
+SDL_mixer uses its bundled **dr_mp3** for MP3 and **stb_vorbis** for OGG Vorbis;
+they are built into SDL_mixer rather than installed as separate packages.
+`vcpkg-ports/sdl3-mixer/` enables dr_mp3, which the registry port disables by
+default. The overlay comes from the official pinned vcpkg port and retains its
+license; see `vcpkg-ports/README.md`. No WarbladeSR checkout is needed to build it.
+
+`vcpkg-ports/sdl3/` builds SDL 3.4.18 with WarbladeSR's ten subsystem exclusions:
+GPU API, GPU renderer, camera, haptics, power information, sensors, native dialogs,
+tray support, OpenGL ES, and HIDAPI are all disabled. Direct3D, desktop OpenGL,
+Vulkan, and generic joystick/XInput support remain available. The disabled GPU
+API is separate from the hardware-accelerated renderer backends. This profile
+does not include HIDAPI-specific controller drivers or the haptic API.
+
+CMake finds and links `SDL3::SDL3`, `SDL3_image::SDL3_image`,
+`SDL3_mixer::SDL3_mixer`, and `ZLIB::ZLIB` to `warblade`. Image/audio codec
+dependencies are linked transitively. All modes use `x64-windows-static` with
+the matching MSVC runtime. Third-party libraries are not automatically ASan
+instrumented. The existing build/run/package tasks need no additional commands,
+and no new Build Tools components are required.
+
+### Adding dependencies
 
 Add packages to `dependencies` in `vcpkg.json`, then use `find_package()` and
 `target_link_libraries()` in `CMakeLists.txt`. The next configure installs them.
 The baseline pins the dependency registry; it does not automatically follow newer
-package releases. SDL3, SDL3_image, and SDL3_mixer will be separate dependencies
-when graphics/audio are introduced.
+package releases. When updating it, review both SDL overlays and the installer
+license list as well.
 
 ## Repository and references
 
@@ -330,7 +371,8 @@ references for structure and tooling. This starter is written independently:
 Its inspected SDL revision contains no standalone media assets. The original media
 included in this repository came from Warblade 1.34, not from that checkout.
 
-The MIT license applies to this project's independently written source code.
+The MIT license applies to this project's independently written source code;
+adapted vcpkg port files retain the Microsoft notice in `vcpkg-ports/LICENSE.txt`.
 It does not cover `assets/` or `packaging/warblade.ico`. Those original files retain
 their owners' rights and restrictions; this project has not established permission
 to redistribute them. See `packaging/warblade-media.txt`. Dependencies retain their
@@ -366,6 +408,26 @@ installed asset matched the repository file by SHA-256. The installed executable
 ran from its own directory, the media notice and shortcut were checked, and
 uninstallation removed the test assets, registration, and shortcuts. No asset
 manifest or importer is retained; asset paths and provenance use relative paths.
+
+After adding the libraries, Debug, ASan, and Release all built and ran successfully.
+An ignored dependency smoke program loaded all 407 images and all 276 audio files,
+generated an audio buffer for each file using an in-memory mixer, and passed a
+zlib compression/decompression round-trip. This checks TGA/PNG/JPEG and
+MP3/OGG/tracker support without opening a window or playing sound on a device.
+The rebuilt installer was installed and uninstalled again; all assets and all
+eight third-party copyright files matched their sources.
+
+During the first dependency build, MSVC 19.52 Insiders intermittently reported
+internal compiler errors in unrelated dependency files. Retrying succeeded;
+the final audio build used `$env:VCPKG_MAX_CONCURRENCY = '8'` before `build.bat`.
+This temporary workaround limits dependency build concurrency and does not alter
+the game's Debug or Release optimization flags.
+
+With the trimmed SDL overlay, all ten selected options were verified OFF in both
+SDL Debug and Release configurations. Direct3D, desktop OpenGL, Vulkan, and generic
+joystick/XInput remained enabled. All three application modes and the full image,
+audio-buffer, and zlib smoke checks passed again; the installer was rebuilt using
+the trimmed dependencies.
 
 Debug packaging was rejected. A requested signing run with a nonexistent certificate
 failed during staging before installer compilation. Successful trusted signing is

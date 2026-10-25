@@ -2,5 +2,14 @@
   "name": "warblade",
   "version-semver": "0.1.0",
   "builtin-baseline": "9eec002df1cd109f8f104cd966a763daf9751489",
-  "dependencies": []
+  "dependencies": [
+    { "name": "sdl3", "default-features": false, "features": ["vulkan"] },
+    { "name": "sdl3-image", "default-features": false, "features": ["jpeg", "png"] },
+    { "name": "sdl3-mixer", "default-features": false, "features": ["drmp3", "libxmp"] },
+    { "name": "libxmp", "default-features": false },
+    "zlib"
+  ],
+  "vcpkg-configuration": {
+    "overlay-ports": ["./vcpkg-ports"]
+  }
 }

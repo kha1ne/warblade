@@ -6,7 +6,15 @@ option(WARBLADE_WARNINGS_AS_ERRORS "Treat warnings in project code as errors" ON
 option(WARBLADE_ENABLE_IPO "Enable link-time optimization in Release" ON)
 option(WARBLADE_ENABLE_ASAN "Instrument project code with MSVC AddressSanitizer" OFF)
 
+find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_image CONFIG REQUIRED)
+find_package(SDL3_mixer CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
+
 add_executable(warblade src/main.cpp)
+target_link_libraries(warblade PRIVATE
+    SDL3::SDL3 SDL3_image::SDL3_image SDL3_mixer::SDL3_mixer ZLIB::ZLIB
+)
 if(WIN32)
     set(WARBLADE_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/warblade.ico")
     configure_file(packaging/warblade.rc.in "${CMAKE_CURRENT_BINARY_DIR}/warblade.rc" @ONLY)

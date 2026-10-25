@@ -7,6 +7,11 @@ install(FILES "${PROJECT_SOURCE_DIR}/packaging/warblade-media.txt" DESTINATION l
         CONFIGURATIONS Release)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/assets/" DESTINATION assets
         CONFIGURATIONS Release)
+foreach(dependency IN ITEMS sdl3 sdl3-image sdl3-mixer libxmp zlib libpng libjpeg-turbo libspng)
+    install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/${dependency}/copyright"
+            DESTINATION "licenses/third-party/${dependency}" RENAME copyright.txt
+            CONFIGURATIONS Release)
+endforeach()
 # Run last, after the payload is staged. An install-script failure stops CPack
 # before it can compile an installer; do not use a best-effort pre-build hook.
 install(SCRIPT "${PROJECT_SOURCE_DIR}/cmake/SignPayload.cmake" CONFIGURATIONS Release)

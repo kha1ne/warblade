@@ -9,3 +9,6 @@
 *.in text eol=lf
 *.vsconfig text eol=lf
 /assets/** binary
+# Preserve upstream patches; blank context lines contain a required leading space.
+/vcpkg-ports/**/*.diff text eol=lf whitespace=-blank-at-eol
+/vcpkg-ports/**/*.patch text eol=lf whitespace=-blank-at-eol
