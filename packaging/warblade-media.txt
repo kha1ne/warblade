@@ -1,0 +1,17 @@
+Original Warblade media and game data
+
+The files under assets/ and packaging/warblade.ico originate from Warblade 1.34
+by Edgar M. Vigdal / EMV Software. They were copied without format conversion.
+The unpacked graphics and game data originally came from data/warblade.pac;
+music, sound effects, and voice packs came from data/music/ and data/samples/.
+The original Lila voice-pack readme credits its samples to Simon Quincey.
+
+These files are separate from the project's independently written source code
+and are not covered by the project's MIT license. Original rights and license
+restrictions remain with their respective owners. Redistribution permission for
+these assets has not been established by this project; including them here does
+not grant redistribution rights.
+
+The assets are included directly in the project and installed under assets/.
+No original Warblade installation, archive, or importer is needed to build or
+install this project. Shortcuts use the icon embedded in warblade.exe.

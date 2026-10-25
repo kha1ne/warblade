@@ -1,0 +1,112 @@
+WARBLADE VOICE
+--------------
+NOTE!!! This file MUST be in the directory containing the 
+voice samples. File format can be wav, mp3 or ogg.
+
+Name of samples available and in use in the game:  (v1.1)
+----------------------------------------------------------
+FILE NAME                WHAT IS SAID
+----------------------------------------------------------
+admiral.wav              Admiral
+alright.wav              Alright!
+armour.wav               Armour
+bonus.wav                Bonus 
+captain.wav              Captain
+commander.wav            Commander
+congratulations.wav      Congratulations!
+doubleshot.wav           Double shot
+ensign.wav               Ensign
+extrabullet.wav          Extra bullet
+speed                    Speed
+extralife.wav            Extra life
+extraspeed.wav           Extra speed
+extratime.wav            Extra time
+freeze.wav               Freeze
+gameover.wav             Game over!
+getready.wav             Get ready!
+getready2.wav            Prepare!! or Are You Ready? (version 2)
+getready3.wav            Game On!                    (version 3)
+goodbye.wav              Goodbye!
+hurryup1.wav             Hurry up!
+hurryup2.wav             Hurry Hurry!! or Come On!!  (version 2)
+lieutenant.wav           Lieutenant
+memorystation.wav        Memory station
+meteorstorm.wav          Meteor storm
+gemdrop.wav              Gem Drop
+money.wav                Money
+oops.wav                 Oops..
+perfect.wav              Perfect!
+player.wav               Player
+player1.wav              Player one
+player2.wav              Player two
+players.wav              Players
+quadshot.wav             Quad shot
+scoop.wav                Scoop
+shield.wav               Shield
+singleshot.wav           Single shot
+sucker.wav               Sucker
+sucker2.wav              Uh Oh!                      (version 2)
+sucker3.wav              Power Down                  (version 3)
+supertripleshot.wav      Super triple shot
+tripleshot.wav           Triple shot
+warning.wav              Warning
+warpmalfunction.wav      Warning! Warning! Warp malfunction!
+welcome.wav              Welcome to Warblade!
+E.wav                    E  (In EXTRA)
+X.wav                    X  (In EXTRA)
+T.wav                    T  (In EXTRA)
+R.wav                    R  (In EXTRA)
+A.wav                    A  (In EXTRA)
+secretfound.wav          Secret found!
+times5.wav               Times 5!  (For the multiply 5 bonus)
+times2.wav               Times 2!  (For the multiply 2 bonus)
+One.wav                  One!
+Two.wav                  Two!
+Three.wav                Three!
+Four.wav                 Four!
+Five.wav                 Five!
+Six.wav                  Six!
+Seven.wav                Seven!
+Eight.wav                Eight!
+Nine.wav                 Nine!
+Ten.wav                  Ten!
+Knight.wav               Knight
+Lord.wav                 Lord
+Overlord.wav             Overlord
+Grandmaster.wav          Grandmaster
+Champion.wav             Champion
+God.wav                  God!
+Star.wav                 Star
+Stars.wav                Stars
+Warblade.wav             Warblade
+Bronze.wav               Bronze
+Silver.wav               Silver
+Gold.wav                 Gold
+Ohno.wav                 Oh NO!
+autofire.wav             Autofire
+bomb.waw                 bomb
+drunk.wav                drunk mode
+gotcha.wav               Gotcha  (got you!)
+mirror.wav               Mirror mode
+rank.wav                 Rank marker
+shop1.wav                Welcome to the shop
+shop2.wav                Can I help you?             (version 2)
+shop3.wav                Anything you fancy?         (Version 3)
+shop4.wav                Can you afford anything?    (Version 4)
+shop5.wav                Time to get Upgraded!       (Version 5)
+pluto                    Pluto
+neptune                  Neptune
+uranus                   Uranus
+saturn                   Saturn
+jupiter                  Jupiter
+mars                     Mars
+tellus                   Tellus
+venus                    Venus
+mercury                  Mercury
+sol                      Sol
+ultimate rank            You've made the ultimate rank
+rank                     Rank
+available                Available
+planet                   Planet
+new                      New
+you are the              You Are The

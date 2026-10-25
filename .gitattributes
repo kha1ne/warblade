@@ -8,3 +8,4 @@
 *.cmake text eol=lf
 *.in text eol=lf
 *.vsconfig text eol=lf
+/assets/** binary

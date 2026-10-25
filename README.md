@@ -6,10 +6,13 @@ A minimal C++ starter for a future Warblade remake. It currently prints:
 Hello, Warblade!
 ```
 
-There is one executable and one source file, plus the original Warblade icon.
-No SDL, gameplay assets, test framework, or engine code is included yet.
-vcpkg is connected in manifest mode with an empty
-dependency list, ready for libraries when needed.
+There is one executable and one source file. The original Warblade icon and
+unpacked graphics, music, sound effects, voice packs, and game data are included
+in the repository. No SDL, test framework, or engine code is included yet; the
+executable still only prints the message above and does not load the assets.
+vcpkg is connected in manifest mode with an empty dependency list, ready for
+libraries when needed. Building and installing require no original Warblade
+installation, archive extraction, or importer.
 
 ## Requirements
 
@@ -178,13 +181,14 @@ The package includes only files selected by CMake `install()` rules:
 
 - `warblade.exe` and runtime DLLs declared through linked CMake shared-library targets.
 - `licenses/warblade.txt` containing this project's license.
-- `licenses/warblade-icon.txt` documenting the original icon's origin and license exclusion.
-- Contents of `assets/game/`, if present, installed under `data/`.
+- `licenses/warblade-media.txt` documenting the original media's origin and license exclusion.
+- All files under `assets/`, installed beside `warblade.exe` as `assets/` with the
+  same subdirectories and filenames.
 
-The starter currently has no gameplay assets or third-party runtime DLLs. When introducing
-libraries, add their required license notices and any plugins or dynamically
+The starter includes 946 asset files and currently has no third-party runtime DLLs.
+When introducing libraries, add their required license notices and any plugins or dynamically
 loaded dependencies not represented in CMake's target graph. PDBs, source code,
-Debug/ASan runtimes, `.tools`, and reference assets are excluded. Keep matching
+Debug/ASan runtimes, `.tools`, and the WarbladeSR reference checkout are excluded. Keep matching
 Release PDBs separately for crash diagnosis. Store future saves/settings outside
 the installation directory; the installer does not create or remove that data.
 
@@ -192,14 +196,13 @@ the installation directory; the installer does not create or remove that data.
 filename, and Windows executable version metadata. Edit packaging settings in
 `cmake/Packaging.cmake`, not the generated `.iss` script under `dist/`.
 
-`packaging/warblade.ico` is the unchanged icon from the original Warblade 1.34
-installation. It is embedded in Debug, ASan, and Release executables and the
+`packaging/warblade.ico` is the included original Warblade 1.34 icon. It is embedded
+in Debug, ASan, and Release executables and the
 installer. Start Menu and desktop shortcuts use the installed executable's icon;
 the uninstall entry also points to it. No separate runtime `.ico` file is needed.
 The icon contains 16x16, 32x32, and 48x48 images. Its provenance and exclusion from
-the MIT license are recorded in `packaging/warblade-icon.txt`, which is also shipped
-in the installer. Redistribution permission for this original asset has not been
-established by this project.
+the MIT license are recorded along with the other media in
+`packaging/warblade-media.txt`, which is also shipped in the installer.
 
 ### Optional signing
 
@@ -271,13 +274,36 @@ build.bat                        Configure, build, run, or package Release
 cmake/                           Installer payload, CPack configuration, optional signing
 packaging/warblade.rc.in          Windows executable icon and version metadata
 packaging/warblade.ico            Original game icon for executable, shortcuts, and installer
-packaging/warblade-icon.txt       Original icon provenance and license exclusion
-assets/game/                     Future distributable assets (installed as data/)
+packaging/warblade-media.txt      Original media provenance and license exclusion
+assets/audio/                    Music, sound effects, voices, and voice metadata
+assets/graphics/                 TGA, JPG, and PNG images
+assets/data/                     Hit masks, levels, and attack patterns
 dist/                            Generated installer and CPack staging (ignored)
 cpp-gamedev-buildtools.vsconfig   Minimal Microsoft Build Tools component selection
 .vscode/                         Extension recommendations, build/run tasks, and debugger settings
 LICENSE                          MIT license for this starter
 ```
+
+## Assets
+
+All 946 files under `assets/` are part of the repository and Release installer.
+The installed layout matches the repository: `warblade.exe` sits beside `assets/`.
+Paths are relative to the project or installation directory; no asset manifest,
+importer, or original game installation is required.
+
+| Content | Relative path | Files |
+| --- | --- | --- |
+| Images: TGA, JPG, PNG | `assets/graphics/` | 407 |
+| Music: MP3 and tracker modules (`.mus`) | `assets/audio/music/` | 25 |
+| Sound effects: MP3 | `assets/audio/sound-effects/` | 112 |
+| Voice audio: MP3 and OGG | `assets/audio/voices/` | 139 |
+| Voice-pack metadata (`.id`) | `assets/audio/voices/*/metadata/` | 3 |
+| Collision masks (`.hma`), levels (`.lvd`), attack patterns (`.swd`) | `assets/data/` | 260 |
+
+Files retain their original names and bytes; Git treats them as binary to prevent
+line-ending changes. The voice packs remain separate under `pack-1/` and `pack-2/`,
+with their corresponding metadata. The current Hello World executable does not
+yet render graphics or play audio.
 
 ## Adding dependencies
 
@@ -291,7 +317,7 @@ when graphics/audio are introduced.
 
 Remote: <https://github.com/kha1ne/warblade>.
 
-Reviewed `C:\Development\CppApp`, the local `cpp-project` template, and these
+Reviewed the local `CppApp` and `cpp-project` examples and these
 references for structure and tooling. This starter is written independently:
 
 - [bsamseth/cpp-project](https://github.com/bsamseth/cpp-project)
@@ -300,10 +326,15 @@ references for structure and tooling. This starter is written independently:
 - [CMake presets](https://cmake.org/cmake/help/v4.4/manual/cmake-presets.7.html)
 - [WarbladeSR SDL branch](https://github.com/bbepis/WarbladeSR/tree/sdl)
 
-`WarbladeSR-inspect/` is an ignored, separate reference checkout. No code or assets
-from it are incorporated into this starter. The original icon was copied from the
-installed game and is excluded from this project's MIT license; other original
-Warblade game assets are not included. Dependencies retain their own licenses.
+`WarbladeSR-inspect/` is an ignored, separate reference checkout, used for research.
+Its inspected SDL revision contains no standalone media assets. The original media
+included in this repository came from Warblade 1.34, not from that checkout.
+
+The MIT license applies to this project's independently written source code.
+It does not cover `assets/` or `packaging/warblade.ico`. Those original files retain
+their owners' rights and restrictions; this project has not established permission
+to redistribute them. See `packaging/warblade-media.txt`. Dependencies retain their
+own licenses.
 
 ## Verification
 
@@ -326,9 +357,15 @@ up. Debug/ASan builds still ran successfully after packaging was added.
 All four original icon images were verified byte-for-byte in the Debug, ASan,
 Release, and installer executable resources. A fresh isolated installation verified
 the installed executable's icon, Start Menu shortcut target, uninstall display
-icon, and installed icon provenance notice. The test installation and shortcuts
+icon, and installed media provenance notice. The test installation and shortcuts
 were removed afterward. The generated installer script also points the optional
 desktop shortcut to the same executable.
+
+The installer was rebuilt with all 946 assets under `assets/`. Every staged and
+installed asset matched the repository file by SHA-256. The installed executable
+ran from its own directory, the media notice and shortcut were checked, and
+uninstallation removed the test assets, registration, and shortcuts. No asset
+manifest or importer is retained; asset paths and provenance use relative paths.
 
 Debug packaging was rejected. A requested signing run with a nonexistent certificate
 failed during staging before installer compilation. Successful trusted signing is

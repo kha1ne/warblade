@@ -10,11 +10,10 @@
 *.p12
 *.key
 
-# Reference checkout and original game files are not part of this project
+# Local reference checkouts and legacy working folders
 /WarbladeSR-inspect/
 /game/
 /data/
-/assets/original/
 
 # Local editor state
 /.vs/

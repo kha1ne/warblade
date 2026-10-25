@@ -3,12 +3,10 @@ install(TARGETS warblade RUNTIME DESTINATION . CONFIGURATIONS Release)
 install(FILES $<TARGET_RUNTIME_DLLS:warblade> DESTINATION . CONFIGURATIONS Release)
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION licenses
         RENAME warblade.txt CONFIGURATIONS Release)
-install(FILES "${PROJECT_SOURCE_DIR}/packaging/warblade-icon.txt" DESTINATION licenses
+install(FILES "${PROJECT_SOURCE_DIR}/packaging/warblade-media.txt" DESTINATION licenses
         CONFIGURATIONS Release)
-if(IS_DIRECTORY "${PROJECT_SOURCE_DIR}/assets/game")
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/assets/game/" DESTINATION data
-            CONFIGURATIONS Release PATTERN ".gitkeep" EXCLUDE)
-endif()
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/assets/" DESTINATION assets
+        CONFIGURATIONS Release)
 # Run last, after the payload is staged. An install-script failure stops CPack
 # before it can compile an installer; do not use a best-effort pre-build hook.
 install(SCRIPT "${PROJECT_SOURCE_DIR}/cmake/SignPayload.cmake" CONFIGURATIONS Release)
