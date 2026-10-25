@@ -6,8 +6,9 @@ A minimal C++ starter for a future Warblade remake. It currently prints:
 Hello, Warblade!
 ```
 
-There is one executable and one source file. No SDL, game assets, test framework,
-or engine code is included yet. vcpkg is connected in manifest mode with an empty
+There is one executable and one source file, plus the original Warblade icon.
+No SDL, gameplay assets, test framework, or engine code is included yet.
+vcpkg is connected in manifest mode with an empty
 dependency list, ready for libraries when needed.
 
 ## Requirements
@@ -177,9 +178,10 @@ The package includes only files selected by CMake `install()` rules:
 
 - `warblade.exe` and runtime DLLs declared through linked CMake shared-library targets.
 - `licenses/warblade.txt` containing this project's license.
+- `licenses/warblade-icon.txt` documenting the original icon's origin and license exclusion.
 - Contents of `assets/game/`, if present, installed under `data/`.
 
-The starter currently has no assets or third-party runtime DLLs. When introducing
+The starter currently has no gameplay assets or third-party runtime DLLs. When introducing
 libraries, add their required license notices and any plugins or dynamically
 loaded dependencies not represented in CMake's target graph. PDBs, source code,
 Debug/ASan runtimes, `.tools`, and reference assets are excluded. Keep matching
@@ -189,6 +191,15 @@ the installation directory; the installer does not create or remove that data.
 `project(... VERSION ...)` in `CMakeLists.txt` controls the installer version,
 filename, and Windows executable version metadata. Edit packaging settings in
 `cmake/Packaging.cmake`, not the generated `.iss` script under `dist/`.
+
+`packaging/warblade.ico` is the unchanged icon from the original Warblade 1.34
+installation. It is embedded in Debug, ASan, and Release executables and the
+installer. Start Menu and desktop shortcuts use the installed executable's icon;
+the uninstall entry also points to it. No separate runtime `.ico` file is needed.
+The icon contains 16x16, 32x32, and 48x48 images. Its provenance and exclusion from
+the MIT license are recorded in `packaging/warblade-icon.txt`, which is also shipped
+in the installer. Redistribution permission for this original asset has not been
+established by this project.
 
 ### Optional signing
 
@@ -258,7 +269,9 @@ vcpkg.json                       Pinned dependency baseline; currently no packag
 setup.ps1                        One-time local tool download
 build.bat                        Configure, build, run, or package Release
 cmake/                           Installer payload, CPack configuration, optional signing
-packaging/warblade.rc.in          Windows executable version metadata
+packaging/warblade.rc.in          Windows executable icon and version metadata
+packaging/warblade.ico            Original game icon for executable, shortcuts, and installer
+packaging/warblade-icon.txt       Original icon provenance and license exclusion
 assets/game/                     Future distributable assets (installed as data/)
 dist/                            Generated installer and CPack staging (ignored)
 cpp-gamedev-buildtools.vsconfig   Minimal Microsoft Build Tools component selection
@@ -288,9 +301,9 @@ references for structure and tooling. This starter is written independently:
 - [WarbladeSR SDL branch](https://github.com/bbepis/WarbladeSR/tree/sdl)
 
 `WarbladeSR-inspect/` is an ignored, separate reference checkout. No code or assets
-from it are incorporated into this starter. Original Warblade game assets are not
-included or covered by this project's MIT license. Dependencies retain their own
-licenses.
+from it are incorporated into this starter. The original icon was copied from the
+installed game and is excluded from this project's MIT license; other original
+Warblade game assets are not included. Dependencies retain their own licenses.
 
 ## Verification
 
@@ -309,6 +322,13 @@ registration were checked. A test 0.1.1 installer upgraded the 0.1.0 installatio
 without being given the previous directory. Uninstallation removed the registered
 files/shortcuts and preserved a user-created file. The test registration was cleaned
 up. Debug/ASan builds still ran successfully after packaging was added.
+
+All four original icon images were verified byte-for-byte in the Debug, ASan,
+Release, and installer executable resources. A fresh isolated installation verified
+the installed executable's icon, Start Menu shortcut target, uninstall display
+icon, and installed icon provenance notice. The test installation and shortcuts
+were removed afterward. The generated installer script also points the optional
+desktop shortcut to the same executable.
 
 Debug packaging was rejected. A requested signing run with a nonexistent certificate
 failed during staging before installer compilation. Successful trusted signing is

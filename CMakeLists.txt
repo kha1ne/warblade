@@ -8,7 +8,11 @@ option(WARBLADE_ENABLE_ASAN "Instrument project code with MSVC AddressSanitizer"
 
 add_executable(warblade src/main.cpp)
 if(WIN32)
+    set(WARBLADE_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/warblade.ico")
     configure_file(packaging/warblade.rc.in "${CMAKE_CURRENT_BINARY_DIR}/warblade.rc" @ONLY)
+    set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/warblade.rc" PROPERTIES
+        OBJECT_DEPENDS "${WARBLADE_ICON_FILE}"
+    )
     target_sources(warblade PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/warblade.rc")
 endif()
 # With the pinned CMake 4.4/MSVC toolchain, C++23 selects /std:c++latest.
